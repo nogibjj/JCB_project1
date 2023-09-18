@@ -1,176 +1,135 @@
-import yfinance as yf
-import datetime
-import pandas as pd
-import numpy as np
+""" A python script that does data analysis using polars dataframes """
+
+import polars as pl
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
+from download_currencies import download_prices_long, create_tickers
 
-""" lib.py file that shares the common code between the script and notebook """
 
-
-def date_range(end_date=None, start_date=None, time_period=30):
+def read_data(path):
     """
-    Return a dictionary with start and end dates.
-    If end_date not specified, today's date will be returned
-    If start_date not specified, 1 month back will be returned
-    Enter dates as yyyymmdd
+    Read the data from the path specified.
     """
-    if time_period > 3600:
-        raise ValueError("Choose a shorter time frame.")
-    if end_date is None:
-        dates = {"end_date": pd.to_datetime(datetime.date.today())}
-        pass
-    else:
-        dates = {"end_date": pd.to_datetime(end_date, dayfirst=True)}
-        pass
-    if start_date is None:
-        dates["start_date"] = dates["end_date"] - datetime.timedelta(days=30)
-        pass
-    else:
-        dates["start_date"] = pd.to_datetime(start_date, dayfirst=True)
-        if (pd.to_datetime(datetime.date.today()) - dates["start_date"]).days > 3600:
-            raise ValueError("Choose a more recent date.")
-        pass
-    return dates
-
-
-def create_ticker(ccy):
-    ticker = ccy.upper() + "=X"
-    return ticker
-
-
-def get_prices(ccy, date_range_dictionary):
-    """ohlc: str | Open, High, Low or Close"""
-    start_date = date_range_dictionary["start_date"]
-    end_date = date_range_dictionary["end_date"]
-    prices = yf.download(create_ticker(ccy.lower()), start_date, end_date)
-    return prices
-
-
-def create_currencies_dict(ccy_list, date_range_dictionary):
-    if type(ccy_list) == str:
-        ccy_list = [ccy_list]
-    ccy_dict = {}
-    for ccy in ccy_list:
-        ccy_dict[ccy] = {"Open": None, "High": None, "Low": None, "Close": None}
-        ccy_dict[ccy]["Open"] = get_prices(ccy, date_range_dictionary)["Open"]
-        ccy_dict[ccy]["High"] = get_prices(ccy, date_range_dictionary)["High"]
-        ccy_dict[ccy]["Low"] = get_prices(ccy, date_range_dictionary)["Low"]
-        ccy_dict[ccy]["Close"] = get_prices(ccy, date_range_dictionary)["Close"]
-        pass
-    return ccy_dict
-
-
-# run some statistics ... max, min and current + % up or down in the period for each ccy?
-def create_df(ccy, ccy_dict):
-    df = pd.DataFrame(ccy_dict[ccy])
-    df.name = ccy
+    try:
+        df = pl.read_csv(path, try_parse_dates=True)
+        df = df.drop_nulls()
+    except FileNotFoundError:
+        tickers = create_tickers(["usdmxn, eurusd, nzdusd"])
+        download_prices_long(tickers)
+        df = pl.read_csv(path, try_parse_dates=True)
+        df = df.drop_nulls()
     return df
 
 
-def get_last(ccy_df):
-    last = ccy_df.Close[-1]
-    return last
-
-
-def print_range(ccy_df):
-    low = ccy_df.Low.min()
-    high = ccy_df.High.max()
-    close = ccy_df.Close[-1]
-    ccy_open = ccy_df.Open[0]
-    average = ccy_df.Close.mean()
-    std_dev = np.std(ccy_df.Close)
-    print(ccy_df.name + "'s current value is {}.".format(round(close, 2)))
-    print(
-        "Between {} and {}:".format(
-            ccy_df.index.min().strftime("%d/%b/%y"),
-            ccy_df.index.max().strftime("%d/%b/%y"),
-        )
-    )
-    print(
-        "- "
-        + ccy_df.name
-        + " {} {}%".format(
-            "dropped" if close < ccy_open else "rose",
-            round((close / ccy_open - 1) * 100, 2),
-        )
-    )
-    print(
-        "- "
-        + ccy_df.name
-        + " reached a low of {} on {}".format(
-            round(low, 2), ccy_df.index[ccy_df.Low == low][0].strftime("%d %b %y")
-        )
-    )
-    print(
-        "- "
-        + ccy_df.name
-        + " reached a high of {} on {}".format(
-            round(high, 2), ccy_df.index[ccy_df.High == high][0].strftime("%d %b %y")
-        )
-    )
-    print(
-        "- "
-        + ccy_df.name
-        + " had an average and standard deviation of {} and {} over the period.".format(
-            round(average, 2), round(std_dev, 2)
-        )
-    )
-    pass
-
-
-def print_ccy_levels(ccy_list, time_period=30):
-    currencies = create_currencies_dict(ccy_list, date_range(time_period=time_period))
-    for ccy in ccy_list:
-        df = create_df(ccy, currencies)
-        print_range(df)
-        pass
-    pass
-
-
-def generate_summary_statistics(
-    ccy_list=None, ccy_dict=None, column="Close", time_period=30
-):
-    if type(ccy_list) == str:
-        ccy_dict = create_currencies_dict(ccy_list, date_range(time_period=time_period))
-        pass
-    if type(ccy_list) == list:
-        ccy_dict = create_currencies_dict(ccy_list, date_range(time_period=time_period))
-    df = pd.DataFrame(columns=ccy_dict.keys())
-    for i in df.columns:
-        df[i] = ccy_dict[i][column]
-        pass
-    return df.describe()
-
-
-def plot_returns(ccy_list=None, ccy_dict=None, column="Close", time_period=30):
-    """It generates a plot of the currencies given.
-    1 - If ccy_list is given, data will be downloaded for every currency in the list.
-    2 - If ccy_dict is given, plots will be generated for every currency in dict.keys
-    """
-    if type(ccy_list) == str:
-        ccy_dict = create_currencies_dict(ccy_list, date_range(time_period=time_period))
-        pass
-    if type(ccy_list) == list:
-        ccy_dict = create_currencies_dict(ccy_list, date_range(time_period=time_period))
-    df = pd.DataFrame(columns=ccy_dict.keys())
-    for i in df.columns:
-        df[i] = ccy_dict[i][column]
-        pass
+def plot_returns(ccy_df, column="Close"):
+    """takes data from a polars dataframe and plots the returns"""
     fig, ax = plt.subplots()
-    for ccy in df.columns:
-        ax.plot(df[ccy].pct_change())
+    tickers = ccy_df["Instrument"].unique()
+    for ccy in tickers:
+        df = ccy_df.filter(
+            (pl.col("Instrument") == ccy) & (pl.col("Price type") == column)
+        )
+        ax.plot(df["Datetime"], df["Price"].pct_change().cumsum())
         pass
-    plt.legend(df.columns)
+    plt.legend(tickers)
     ax.set_ylabel("% change")
     ax.set_xlabel("Date")
     plt.xticks(rotation=45)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d%b"))
+    plt.locator_params(axis="x", nbins=5)
+    ax.xaxis.set_major_locator(plt.MaxNLocator(20))
+    ax.yaxis.set_major_formatter(mticker.PercentFormatter(1.0))
     fig.suptitle("Currency returns")
+    pass
 
 
-# potentially add bollinger bands?
+def print_range(ccy_df):
+    tickers = ccy_df["Instrument"].unique()
+    print(
+        "Let's analyze the following currencies {}:\n".format(
+            [ccy[:6] for ccy in tickers]
+        )
+    )
+    for ccy in tickers:
+        ccy_reduced = ccy[:6]
+        low = (
+            ccy_df.filter(
+                (pl.col("Instrument") == ccy) & (pl.col("Price type") == "Low")
+            )
+            .min()["Price"]
+            .item()
+        )
+        high = (
+            ccy_df.filter(
+                (pl.col("Instrument") == ccy) & (pl.col("Price type") == "High")
+            )
+            .max()["Price"]
+            .item()
+        )
+        close = ccy_df.filter(
+            (pl.col("Instrument") == ccy) & (pl.col("Price type") == "Close")
+        )[-1]["Price"].item()
+        ccy_open = ccy_df.filter(
+            (pl.col("Instrument") == ccy) & (pl.col("Price type") == "Open")
+        )[0]["Price"].item()
+        average = ccy_df.filter(
+            (pl.col("Instrument") == ccy) & (pl.col("Price type") == "Close")
+        )["Price"].mean()
+        std_dev = ccy_df.filter(
+            (pl.col("Instrument") == ccy) & (pl.col("Price type") == "Close")
+        )["Price"].std()
+        print(ccy_reduced + "'s current value is {}.".format(round(close, 2)))
+        print(
+            "Between {} and {}:".format(
+                ccy_df["Datetime"].min().strftime("%d/%b/%y"),
+                ccy_df["Datetime"].max().strftime("%d/%b/%y"),
+            )
+        )
+        print(
+            "- "
+            + ccy_reduced
+            + " {} {}%".format(
+                "dropped" if close < ccy_open else "rose",
+                round((close / ccy_open - 1) * 100, 2),
+            )
+        )
+        print(
+            "- "
+            + ccy_reduced
+            + " reached a low of {} on {}".format(
+                round(low, 2),
+                ccy_df.filter(pl.col("Price") == low)[0]["Datetime"]
+                .item()
+                .strftime("%d %b %y"),
+            )
+        )
+        print(
+            "- "
+            + ccy_reduced
+            + " reached a high of {} on {}".format(
+                round(high, 2),
+                ccy_df.filter(pl.col("Price") == high)[0]["Datetime"]
+                .item()
+                .strftime("%d %b %y"),
+            )
+        )
+        print(
+            "- "
+            + ccy_reduced
+            + " had an average and standard deviation of {} and {} over the period.".format(
+                round(average, 2), round(std_dev, 2)
+            )
+        )
+        print(
+            ccy_df.filter(
+                (pl.col("Instrument") == ccy) & (pl.col("Price type") == "Close")
+            )["Price"].describe()
+        )
+
 
 if __name__ == "__main__":
-    ccys = ["usdmxn", "eurusd", "nzdusd"]
-    print(generate_summary_statistics(ccys))
-    print_ccy_levels(ccys)
-    plot_returns(ccys)
+    currencies = read_data("currency_prices_long.csv")
+    print_range(currencies)
+    plot_returns(currencies)
+    plt.savefig("currency_returns.png")

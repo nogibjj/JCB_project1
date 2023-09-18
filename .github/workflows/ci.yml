@@ -1,5 +1,4 @@
-# test
-name: Test
+name: Descriptive statistics
 on: 
   push:
     branches: ["main"]
@@ -16,6 +15,13 @@ jobs:
         with: 
           python-version: '3.10.12'
       - uses: actions/checkout@v3
+      - name: install packages
+        run: make install
+      - name: lint
+        run: make lint
       - name: test
         run: make test
-      
+      - name: format
+        run: make format
+      - name: run_main
+        run: make plot
