@@ -44,11 +44,6 @@ def plot_returns(ccy_df, column="Close"):
     pass
 
 
-def save_plot(path):
-    plt.savefig(path)
-    pass
-
-
 def print_range(ccy_df):
     tickers = ccy_df["Instrument"].unique()
     print(
