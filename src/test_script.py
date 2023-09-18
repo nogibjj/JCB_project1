@@ -1,8 +1,8 @@
 """ Test script for yf_currencies """
-from yf_currencies import *
+import yf_currencies as yfc
 
 
 def test_yf_currencies():
-    assert "usdmxn" in currencies
-    assert prices.shape[1] == 5
-    assert "High" in average_prices["Price type"]
+    assert "usdmxn" in yfc.currencies
+    assert yfc.prices.shape[1] == 5
+    assert "High" in yfc.average_prices["Price type"]
