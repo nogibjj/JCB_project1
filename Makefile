@@ -8,7 +8,7 @@ test:
 
 # format
 format:	
-	black *.py
+	black src/*.py
 
 # lint
 lint:
