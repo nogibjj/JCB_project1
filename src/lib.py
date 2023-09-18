@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+""" lib.py file that shares the common code between the script and notebook """
+
 
 def date_range(end_date=None, start_date=None, time_period=30):
     """
