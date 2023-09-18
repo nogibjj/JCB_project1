@@ -13,7 +13,7 @@ def create_tickers(ccy_list):
 
 
 def download_prices_long(tickers):
-    data = yf.download(tickers, period="1mo", interval="60m")
+    data = yf.download(tickers, period="6mo", interval="60m")
     if len(tickers) == 1:
         data.columns = [data.columns, pd.Series(tickers * len(data.columns))]
     data.reset_index(inplace=True)
