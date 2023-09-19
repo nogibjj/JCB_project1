@@ -1,4 +1,4 @@
-name: Descriptive statistics
+name: Install, lint, format, test
 on: 
   push:
     branches: ["main"]
@@ -23,5 +23,3 @@ jobs:
         run: make test
       - name: format
         run: make format
-      - name: run_main
-        run: make plot

@@ -4,15 +4,15 @@ install:
 
 # test
 test:
-	python -m pytest -vv --cov=main test_*.py
+	python -m pytest -vv --cov=main src/test_*.py
 
 # format
 format:	
-	black *.py
+	black src/*.py
 
 # lint
 lint:
-	pylint --disable=R,C --disable=unnecessary-pass --ignore-patterns=test_.*?py *.py
+	pylint --disable=R,C --disable=unnecessary-pass --ignore-patterns=test_.*?py src/*.py
 # container-lint
 
 # deploy
