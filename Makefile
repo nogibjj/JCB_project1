@@ -9,11 +9,14 @@ test:
 # format
 format:	
 	black src/*.py
+	nbqa black src/*.ipynb
 
 # lint
 lint:
-	pylint --disable=R,C --disable=unnecessary-pass --ignore-patterns=test_.*?py src/*.py
-# container-lint
+	# pylint --disable=R,C --disable=unnecessary-pass --ignore-patterns=test_.*?py src/*.py
+	nbqa ruff src/*.ipynb
+	ruff check src/*.py
+
 
 # deploy
 
