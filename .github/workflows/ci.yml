@@ -1,4 +1,4 @@
-name: Descriptive statistics
+name: Install, lint, format, test
 on: 
   push:
     branches: ["main"]
