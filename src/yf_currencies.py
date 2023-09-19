@@ -1,12 +1,12 @@
 """ This is a script that performs some descriptive analysis on diverse currencies """
 
-# Let's import the descriptive statistics we've created in lib.py and a few methods from our download_currencies module:
+# Let's import lib.py and download_currencies to perform descriptive statistics:
 
 from lib import read_data, print_range, plot_returns
 from download_currencies import download_prices_long, create_tickers
 import polars as pl
 
-# use download_prices_long to download hourly data on usdmxn, eurusd, nzdusd for the last 6 months
+# use download_prices_long to download hourly data on usdmxn, eurusd, nzdusd
 currencies = ["usdmxn", "eurusd", "nzdusd"]
 tickers = create_tickers(currencies)
 download_prices_long(tickers)
@@ -16,7 +16,7 @@ prices = read_data("currency_prices_long.csv")
 print(prices.head())
 print(prices["Price type"].unique())
 
-# Let's look at a quick example of each currency's average price by Price type for the last 6 months:
+# Let's look at a quick example of each currency's average price by Price type:
 average_prices = (
     prices.group_by(["Instrument", "Price type"])
     .mean()

@@ -117,7 +117,8 @@ def print_range(ccy_df):
         print(
             "- "
             + ccy_reduced
-            + " had an average and standard deviation of {} and {} over the period.".format(
+            + " had an average and standard deviation "
+            + "of {} and {} over the period.".format(
                 round(average, 2), round(std_dev, 2)
             )
         )
