@@ -5,7 +5,7 @@ install:
 # test
 test:
 	python -m pytest -vv --cov=main src/test_*.py
-	# python -m pytest --nbval src/*.ipynb
+	python -m pytest --nbval src/*.ipynb
 
 # format
 format:	
