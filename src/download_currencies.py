@@ -13,10 +13,7 @@ def create_tickers(ccy_list):
 
 
 def download_prices_long(tickers, start=None, end=None, period=None):
-    if (start is None) & (end is None) & (period is None):
-        data = yf.download(tickers, period="6mo", interval="60m")
-        pass
-    elif start is None:
+    if (start is None) & (end is None):
         data = yf.download(tickers, period=period, interval="60m")
         pass
     else:
