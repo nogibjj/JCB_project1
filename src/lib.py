@@ -16,7 +16,7 @@ def read_data(path):
         df = df.drop_nulls()
     except FileNotFoundError:
         tickers = create_tickers(["usdmxn, eurusd, nzdusd"])
-        download_prices_long(tickers)
+        download_prices_long(tickers, start="2023-03-20", end="2023-09-15")
         df = pl.read_csv(path, try_parse_dates=True)
         df = df.drop_nulls()
     return df

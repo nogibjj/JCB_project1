@@ -9,7 +9,7 @@ import polars as pl
 # use download_prices_long to download hourly data on usdmxn, eurusd, nzdusd
 currencies = ["usdmxn", "eurusd", "nzdusd"]
 tickers = create_tickers(currencies)
-download_prices_long(tickers)
+download_prices_long(tickers, start="2023-03-20", end="2023-09-15")
 
 # import data as polars dataframe
 prices = read_data("currency_prices_long.csv")

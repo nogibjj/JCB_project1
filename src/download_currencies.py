@@ -12,8 +12,15 @@ def create_tickers(ccy_list):
     return tickers
 
 
-def download_prices_long(tickers):
-    data = yf.download(tickers, start="2023-03-20", end="2023-09-15", interval="60m")
+def download_prices_long(tickers, start=None, end=None, period=None):
+    if (start is None) & (end is None) & (period is None):
+        data = yf.download(tickers, period="6mo", interval="60m")
+        pass
+    elif start is None:
+        data = yf.download(tickers, period=period, interval="60m")
+        pass
+    else:
+        data = yf.download(tickers, start=start, end=end, interval="60m")
     if len(tickers) == 1:
         data.columns = [data.columns, pd.Series(tickers * len(data.columns))]
     data.reset_index(inplace=True)
