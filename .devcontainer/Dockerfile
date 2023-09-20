@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/universal:2-focal
 
 RUN apt-get update && apt-get -y install --no-install-recommends \
    ffmpeg \ 
-   python3.8-venv \
+   python3.10-venv \
    gcc \
    pciutils
 
