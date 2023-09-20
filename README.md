@@ -7,7 +7,7 @@
 
 ## Continuous Integration using GitHub Actions of Python Data Science Project
 
-This project contains scripts for downloading historic data on diverse currencies, importing and manipulating that data using polars and a notebook that runs through its implementation as well as performing some data analytics. Access a quick video that explains the workflow [here].
+This project contains scripts for downloading historic data on diverse currencies, importing and manipulating that data using polars and a notebook that runs through its implementation as well as performing some data analytics. Access a [quick video](https://youtu.be/68yXpxzG0Ds) that explains the workflow.
 
 
 ### USDMXN, EURUSD, NZDUSD performance between 20/Mar/23 and 19/Sep/23:
